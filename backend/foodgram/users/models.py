@@ -3,9 +3,10 @@ from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
-    email = models.EmailField(max_length=254)
+    email = models.EmailField(max_length=254, unique=True)
 
     class Meta:
+        ordering = ['id']
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
 
@@ -13,29 +14,22 @@ class User(AbstractUser):
         return self.username
 
 
-class Subscribe(models.Model):
+class Follow(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='subscriber',
-        verbose_name='Подписчик'
+        related_name='follower'
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='subscribing',
-        verbose_name='Автор'
+        related_name='follow'
     )
 
     class Meta:
-        verbose_name = 'Подписка'
+        ordering = ['-id']
+        verbose_name = 'Подписка на автора'
         verbose_name_plural = 'Подписки'
-        constraints = [
-            models.UniqueConstraint(
-                fields=['user', 'author'],
-                name='unique_subscribe'
-            )
-        ]
 
-    def __str__(self) -> str:
-        return f'{self.user} -- {self.author}'
+    def __str__(self):
+        return f'{self.user} - {self.author}'

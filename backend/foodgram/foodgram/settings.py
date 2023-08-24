@@ -1,7 +1,8 @@
-import os
 from pathlib import Path
+import os
 
 from dotenv import load_dotenv
+
 
 load_dotenv()
 
@@ -11,12 +12,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    'backend',
-]
-
+ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -24,14 +20,13 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'django_filters',
     'rest_framework',
     'rest_framework.authtoken',
-    'django_filters',
     'djoser',
-    'django.contrib.staticfiles',
-    'recipes.apps.RecipesConfig',
     'users.apps.UsersConfig',
-    'api.apps.ApiConfig'
+    'recipes.apps.RecipesConfig',
 ]
 
 MIDDLEWARE = [
@@ -64,21 +59,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'foodgram.wsgi.application'
 
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME' : os.getenv('POSTGRES_DB'),
-#         'USER' : os.getenv('POSTGRES_USER'),
-#         'PASSWORD' : os.getenv('POSTGRES_PASSWORD'),
-#         'HOST' : os.getenv('DB_HOST'),
-#         'PORT' : os.getenv('DB_PORT')
-#     }
-# }
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -101,7 +85,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
@@ -112,10 +95,6 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
     ],
-    'DEFAULT_PAGINATION_CLASS': [
-        'api.pagination.CustomPaginator',
-    ],
-    'PAGE_SIZE': 6,
     'SEARCH_PARAM': 'name',
 }
 
@@ -125,10 +104,11 @@ DJOSER = {
 
 LANGUAGE_CODE = 'ru'
 
-
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
+
+USE_L10N = True
 
 USE_TZ = True
 
@@ -140,6 +120,5 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-FILE_NAME = 'shopping.txt'
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
