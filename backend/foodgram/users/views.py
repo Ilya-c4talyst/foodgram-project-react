@@ -16,7 +16,7 @@ from .serializers import (
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [permissions.AllowAny,]
+    permission_classes = [permissions.AllowAny, ]
     pagination_class = CustomPageNumberPagination
 
     def create(self, request):

@@ -90,8 +90,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
             )
 
     @action(
-            detail=False, methods=['get'],
-            permission_classes=[permissions.IsAuthenticated]
+        detail=False, methods=['get'],
+        permission_classes=[permissions.IsAuthenticated]
     )
     def favorites(self, request):
         favorites = Favorites.objects.filter(user=request.user)
