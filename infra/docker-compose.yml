@@ -1,11 +1,5 @@
 version: '3.3'
 services:
-  # db:
-  #   image: postgres:13.0-alpine
-  #   volumes:
-  #     - db_food:/var/lib/postgresql/data/
-  #   env_file:
-  #     - ./.env
   backend:
     build:
       context: ../backend
@@ -14,12 +8,8 @@ services:
     volumes:
       - static_food:/app/static/
       - media_food:/app/media/
-    # depends_on:
-    #   - db
     env_file:
       - ./.env
-
-
   frontend:
     build:
       context: ../frontend
@@ -38,6 +28,5 @@ services:
       - media_food:/var/html/media/
     restart: always
 volumes:
-  # db_food:
   static_food:
   media_food:
