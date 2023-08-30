@@ -14,7 +14,7 @@ class Ingredient(models.Model):
     measurement_unit = models.CharField(max_length=rc_len)
 
     class Meta:
-        ordering = ['name',]
+        ordering = ['name', ]
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
         constraints = [models.UniqueConstraint(
@@ -62,7 +62,7 @@ class Recipe(models.Model):
     tags = models.ManyToManyField(Tag)
 
     class Meta:
-        ordering = ['name',]
+        ordering = ['name', ]
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
 
