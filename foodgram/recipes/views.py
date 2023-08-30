@@ -40,7 +40,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = FilterForRecipes
     pagination_class = CustomPagination
-    permission_classes = [IsAuthorOrReadOnlyPermission,]
+    permission_classes = [IsAuthorOrReadOnlyPermission, ]
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_serializer_class(self):
@@ -52,7 +52,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=True, methods=['post', 'delete'],
-        permission_classes=[permissions.IsAuthenticated,]
+        permission_classes=[permissions.IsAuthenticated, ]
     )
     def favorite(self, request, pk):
         user = self.request.user
@@ -85,7 +85,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=False, methods=['get'],
-        permission_classes=[permissions.IsAuthenticated,]
+        permission_classes=[permissions.IsAuthenticated, ]
     )
     def favorites(self, request):
         favorites = Favorites.objects.filter(user=request.user)
@@ -96,7 +96,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=True, methods=['post', 'delete'],
-        permission_classes=[permissions.IsAuthenticated,]
+        permission_classes=[permissions.IsAuthenticated, ]
     )
     def shopping_cart(self, request, pk=None):
         recipe = self.get_object()
@@ -135,7 +135,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=False, methods=['get'],
-        permission_classes=[permissions.IsAuthenticated,]
+        permission_classes=[permissions.IsAuthenticated, ]
     )
     def download_shopping_cart(self, request):
         content = self.generate_shopping_cart_content(request.user)
