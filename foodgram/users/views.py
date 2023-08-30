@@ -28,7 +28,7 @@ class UserViewSet(UserViewSet):
 
     @action(
         detail=True, methods=['post', 'delete'],
-        permission_classes=[permissions.IsAuthenticated,],
+        permission_classes=[permissions.IsAuthenticated, ],
         serializer_class=FollowSerializer
     )
     def subscribe(self, request, id):
