@@ -91,12 +91,12 @@ class FollowCreateSerializer(serializers.ModelSerializer):
         model = Follow
         fields = '__all__'
         validators = [
-                UniqueTogetherValidator(
-                    queryset=Follow.objects.all(),
-                    fields=('user', 'author'),
-                    message='Вы уже подписаны на этого пользователя.'
-                )
-            ]
+            UniqueTogetherValidator(
+                queryset=Follow.objects.all(),
+                fields=('user', 'author'),
+                message='Вы уже подписаны на этого пользователя.'
+            )
+        ]
 
     def validate(self, data):
         if data['user'] == data['author']:
