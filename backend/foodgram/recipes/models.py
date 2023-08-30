@@ -1,6 +1,6 @@
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.db import models
 from django.contrib.auth import get_user_model
+from django.db import models
 from colorfield.fields import ColorField
 
 from .constants import rc_len, max_time, min_time, max_amount, min_amount
@@ -14,7 +14,7 @@ class Ingredient(models.Model):
     measurement_unit = models.CharField(max_length=rc_len)
 
     class Meta:
-        ordering = ['name']
+        ordering = ['name',]
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
         constraints = [models.UniqueConstraint(
@@ -95,6 +95,7 @@ class IngredientsInRecipe(models.Model):
             fields=['recipe', 'ingredient'], name='unique_ingredient_recipe'
         )]
         verbose_name = 'Ингредиенты в рецепте'
+        verbose_name_plural = 'Ингредиенты в рецепте'
 
     def __str__(self):
         return (
@@ -146,8 +147,8 @@ class Favorites(models.Model):
 
     def __str__(self):
         return f'{self.user} <--> {self.recipe}'
-    
 
+# Я не понимаю, как здесь указывать related name?
 # class BaseRelationModel(models.Model):
 #     user = models.ForeignKey(
 #         User,
@@ -189,4 +190,3 @@ class Favorites(models.Model):
 
 #     def __str__(self):
 #         return f'{self.user} <--> {self.recipe}'
-

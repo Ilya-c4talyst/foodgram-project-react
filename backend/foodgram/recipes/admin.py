@@ -27,7 +27,9 @@ class IngredientInline(admin.TabularInline):
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'name', 'author', 'display_ingredients', 'in_favorites')
+    list_display = (
+        'pk', 'name', 'author', 'display_ingredients', 'in_favorites'
+    )
     list_editable = ('name', 'author')
     list_filter = ('name', 'author', 'tags')
     empty_value_display = '-пусто-'
@@ -37,7 +39,13 @@ class RecipeAdmin(admin.ModelAdmin):
 
     @admin.display(description='Ингредиенты')
     def display_ingredients(self, obj):
-        ingredients_list = ', '.join([ingredient.ingredient.name for ingredient in obj.ingredients.all() if ingredient.ingredient.name])
+        ingredients_list = ', '.join(
+            [
+                ingredient.ingredient.name
+                for ingredient in obj.ingredients.all()
+                if ingredient.ingredient.name
+            ]
+        )
         return ingredients_list
 
     @admin.display(description='Избранное')

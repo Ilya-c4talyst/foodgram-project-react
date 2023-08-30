@@ -42,16 +42,11 @@ class UserCreateSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
-    
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data.pop('password', None)
         return data
-
-
-class ChangePasswordSerializer(serializers.Serializer):
-    new_password = serializers.CharField()
-    current_password = serializers.CharField()
 
 
 class RecipeOnFollowSerializer(serializers.ModelSerializer):

@@ -1,6 +1,3 @@
-import base64
-
-from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
@@ -49,15 +46,6 @@ class IngredientsInRecipeSerializer(serializers.ModelSerializer):
         )
 
 
-# class Base64ImageField(serializers.ImageField):
-#     def to_internal_value(self, data):
-#         if isinstance(data, str) and data.startswith('data:image'):
-#             format, imgstr = data.split(';base64,')
-#             ext = format.split('/')[-1]
-#             data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-#         return super().to_internal_value(data)
-
-
 class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
     ingredients = IngredientsInRecipeSerializer(
@@ -77,27 +65,24 @@ class RecipeSerializer(serializers.ModelSerializer):
             'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time'
         )
 
-    # def get_is_favorited(self, obj):
-    #     user_now = self.context['request']
-    #     return (
-    #         user_now.is_authenticated
-    #         and obj.favorites_recipe.filter(user=user_now).exists()
-    #     )
     def get_is_favorited(self, obj):
         return (
-            # self.context.get('request') is not None
             self.context['request'].user.is_authenticated
-            and obj.favorites_recipe.filter(user=self.context['request'].user).exists()
+            and obj.favorites_recipe.filter(
+                user=self.context['request'].user
+            ).exists()
         )
 
     def get_is_in_shopping_cart(self, obj):
         return (
             self.context['request'].user.is_authenticated
-            and obj.shopping_cart_recipe.filter(user=self.context['request'].user).exists()
+            and obj.shopping_cart_recipe.filter(
+                user=self.context['request'].user
+            ).exists()
         )
 
 
-class FavoriteCreateShowSerializer(serializers.ModelSerializer):
+class CreateShowSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
@@ -122,6 +107,7 @@ class ShopSerializer(serializers.ModelSerializer):
 
 
 class FavoriteCreateSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Favorites
         fields = '__all__'
@@ -134,6 +120,7 @@ class FavoriteCreateSerializer(serializers.ModelSerializer):
 
 
 class ShopCreateSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = ShoppingCart
         fields = '__all__'
@@ -149,6 +136,7 @@ class IngredientRecipeCreateSerializer(serializers.Serializer):
     id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
     amount = serializers.IntegerField()
 
+
 class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
     tags = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Tag.objects.all()
@@ -158,12 +146,16 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
 
     def validate_tags(self, tags):
         if not tags:
-            raise serializers.ValidationError('Необходимо указать тег/теги.')
+            raise serializers.ValidationError(
+                'Необходимо указать тег/теги.'
+            )
         return tags
-    
+
     def validate_ingredients(self, ingredients):
         if not ingredients:
-            raise serializers.ValidationError('At least one ingredient must be provided.')
+            raise serializers.ValidationError(
+                'Необходимо указать ингредиенты.'
+            )
         return ingredients
 
     class Meta:
@@ -173,7 +165,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
 
     def to_representation(self, value):
         return RecipeSerializer(value, context=self.context).data
-    
+
     def create_ingredients(self, recipe, ingredients_data):
         ingredients = []
         for ingredient_data in ingredients_data:

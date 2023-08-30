@@ -44,7 +44,9 @@ class Follow(models.Model):
     class Meta:
         ordering = ['user']
         constraints = [
-            UniqueConstraint(fields=['user', 'author'], name='unique_user_author'),
+            UniqueConstraint(
+                fields=['user', 'author'], name='unique_user_author'
+            ),
             CheckConstraint(
                 check=~Q(user=F('author')),
                 name='user_not_equal_author'
