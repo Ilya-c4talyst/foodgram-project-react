@@ -1,12 +1,27 @@
 from django.db import models
+from django.db.models import Q, F
+from django.db.models.constraints import CheckConstraint, UniqueConstraint
 from django.contrib.auth.models import AbstractUser
+
+from .validators import validate_username
 
 
 class User(AbstractUser):
-    email = models.EmailField(max_length=254, unique=True)
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = [
+        'username',
+        'first_name',
+        'last_name',
+    ]
+    email = models.EmailField(unique=True)
+    username = models.CharField(
+        max_length=150, unique=True, validators=[validate_username]
+    )
+    first_name = models.CharField(max_length=150)
+    last_name = models.CharField(max_length=150)
 
     class Meta:
-        ordering = ['id']
+        ordering = ['last_name', 'first_name']
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
 
@@ -27,7 +42,14 @@ class Follow(models.Model):
     )
 
     class Meta:
-        ordering = ['-id']
+        ordering = ['user']
+        constraints = [
+            UniqueConstraint(fields=['user', 'author'], name='unique_user_author'),
+            CheckConstraint(
+                check=~Q(user=F('author')),
+                name='user_not_equal_author'
+            ),
+        ]
         verbose_name = 'Подписка на автора'
         verbose_name_plural = 'Подписки'
 

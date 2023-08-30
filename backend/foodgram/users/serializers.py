@@ -1,7 +1,9 @@
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 
 from .models import User, Follow
 from recipes.models import Recipe
+from recipes.constants import recipes_default
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -15,10 +17,9 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
     def get_is_subscribed(self, obj):
-        user_now = self.context['request'].user
         return (
-            user_now.is_authenticated
-            and obj.follower.filter(user=user_now).exists()
+            self.context['request'].user.is_authenticated
+            and obj.follow.filter(user=self.context['request'].user).exists()
         )
 
 
@@ -41,6 +42,11 @@ class UserCreateSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+    
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data.pop('password', None)
+        return data
 
 
 class ChangePasswordSerializer(serializers.Serializer):
@@ -54,9 +60,7 @@ class RecipeOnFollowSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'image', 'cooking_time')
 
 
-class FollowSerializer(serializers.ModelSerializer):
-    # user = UserSerializer(read_only=True)
-    is_subscribed = serializers.SerializerMethodField()
+class FollowSerializer(UserSerializer):
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
@@ -73,15 +77,11 @@ class FollowSerializer(serializers.ModelSerializer):
             'recipes_count'
         )
 
-    def get_is_subscribed(self, obj):
-        user_now = self.context['request'].user
-        return (
-            user_now.is_authenticated
-            and obj.follow.filter(user=user_now).exists()
-        )
-
     def get_recipes(self, obj):
-        recipes_by_author = obj.recipes.all()
+        limit = self.context['request'].query_params.get(
+            'recipes_limit', recipes_default
+        )
+        recipes_by_author = obj.recipes.all()[:int(limit)]
         return RecipeOnFollowSerializer(
             recipes_by_author, many=True, context=self.context
         ).data
@@ -95,3 +95,16 @@ class FollowCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Follow
         fields = '__all__'
+        validators = [
+                UniqueTogetherValidator(
+                    queryset=Follow.objects.all(),
+                    fields=('user', 'author'),
+                    message='Вы уже подписаны на этого пользователя.'
+                )
+            ]
+
+    def validate(self, data):
+        if data['user'] == data['author']:
+            raise serializers.ValidationError(
+                'Вы не можете подписаться на самого себя.')
+        return data
