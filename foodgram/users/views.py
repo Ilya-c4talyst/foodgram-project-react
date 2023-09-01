@@ -15,10 +15,12 @@ from .serializers import (
 
 
 class UserViewSet(UserViewSet):
-    queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny, ]
     pagination_class = CustomPagination
+
+    def get_queryset(self):
+        return User.objects.all()
 
     def create(self, request):
         serializer = UserCreateSerializer(data=request.data)
@@ -46,7 +48,7 @@ class UserViewSet(UserViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
-            subscribe = user.follower.filter(author=author)
+            subscribe, _ = user.follower.filter(author=author).delete()
             if not subscribe:
                 raise ValidationError(
                     {
@@ -55,7 +57,6 @@ class UserViewSet(UserViewSet):
                         ]
                     }
                 )
-            subscribe.delete()
             return Response(
                 status=status.HTTP_204_NO_CONTENT
             )
@@ -66,9 +67,10 @@ class UserViewSet(UserViewSet):
         serializer_class=FollowSerializer
     )
     def subscriptions(self, request):
-
-        def queryset():
-            return User.objects.filter(follow__user=self.request.user)
-
-        self.get_queryset = queryset
-        return self.list(request)
+        queryset = User.objects.filter(follow__user=self.request.user)
+        paginator = CustomPagination()
+        result_page = paginator.paginate_queryset(queryset, request)
+        serializer = FollowSerializer(
+            result_page, many=True, context={'request': request}
+        )
+        return paginator.get_paginated_response(serializer.data)

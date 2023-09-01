@@ -1,4 +1,3 @@
-from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from drf_extra_fields.fields import Base64ImageField
@@ -67,7 +66,8 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def get_is_favorited(self, obj):
         return (
-            self.context['request'].user.is_authenticated
+            bool(self.context.get('request'))
+            and self.context['request'].user.is_authenticated
             and obj.favorites_recipe.filter(
                 user=self.context['request'].user
             ).exists()
@@ -75,7 +75,8 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def get_is_in_shopping_cart(self, obj):
         return (
-            self.context['request'].user.is_authenticated
+            bool(self.context.get('request'))
+            and self.context['request'].user.is_authenticated
             and obj.shopping_cart_recipe.filter(
                 user=self.context['request'].user
             ).exists()
@@ -134,7 +135,7 @@ class ShopCreateSerializer(serializers.ModelSerializer):
 
 class IngredientRecipeCreateSerializer(serializers.Serializer):
     id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
-    amount = serializers.IntegerField()
+    amount = serializers.IntegerField(min_value=1, max_value=1000)
 
 
 class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
@@ -152,6 +153,14 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         return tags
 
     def validate_ingredients(self, ingredients):
+        ingredient_ids = set()
+        for ingredient in ingredients:
+            ingredient_id = ingredient['id'].id
+            if ingredient_id in ingredient_ids:
+                raise serializers.ValidationError(
+                    'Ингредиенты не должны повторяться.'
+                )
+            ingredient_ids.add(ingredient_id)
         if not ingredients:
             raise serializers.ValidationError(
                 'Необходимо указать ингредиенты.'
@@ -166,14 +175,14 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
     def to_representation(self, value):
         return RecipeSerializer(value, context=self.context).data
 
-    def create_ingredients(self, recipe, ingredients_data):
+    @staticmethod
+    def create_ingredients(recipe, ingredients_data):
         ingredients = []
         for ingredient_data in ingredients_data:
             ingredient_id = ingredient_data['id'].id
             amount = ingredient_data['amount']
-            ingredient = get_object_or_404(Ingredient, id=ingredient_id)
             ingredients.append(IngredientsInRecipe(
-                ingredient=ingredient,
+                ingredient_id=ingredient_id,
                 recipe=recipe,
                 amount=amount
             ))
@@ -192,8 +201,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         tags_data = validated_data.pop('tags')
         ingredients_data = validated_data.pop('ingredients')
-        instance = super().update(instance, validated_data)
         instance.tags.set(tags_data)
         instance.ingredients.clear()
         self.create_ingredients(instance, ingredients_data)
-        return instance
+        return super().update(instance, validated_data)

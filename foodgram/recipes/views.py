@@ -69,8 +69,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
-            follow = user.favorites_user.filter(recipe=recipe)
-            if not follow:
+            deleted_count, _ = user.favorites_user.filter(
+                recipe=recipe
+            ).delete()
+            if not deleted_count:
                 raise serializers.ValidationError(
                     {
                         'errors': [
@@ -78,7 +80,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
                         ]
                     }
                 )
-            follow.delete()
             return Response(
                 status=status.HTTP_204_NO_CONTENT
             )
@@ -103,7 +104,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
         if request.method == 'POST':
             user = request.user
-            if ShoppingCart.objects.filter(user=user, recipe=recipe).exists():
+            if ShoppingCart.objects.filter(
+                user=user, recipe=recipe
+            ).exists():
                 return Response(
                     {'errors': 'Рецепт уже в корзине'},
                     status=status.HTTP_400_BAD_REQUEST
@@ -124,7 +127,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             deleted_count, _ = ShoppingCart.objects.filter(
                 user=request.user, recipe=recipe
             ).delete()
-            if deleted_count == 0:
+            if not deleted_count:
                 return Response(
                     {'errors': 'Рецепта нет в корзине'},
                     status=status.HTTP_400_BAD_REQUEST
@@ -135,7 +138,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=False, methods=['get'],
-        permission_classes=[permissions.IsAuthenticated, ]
+        permission_classes=[permissions.IsAuthenticated]
     )
     def download_shopping_cart(self, request):
         content = self.generate_shopping_cart_content(request.user)
@@ -147,16 +150,17 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def generate_shopping_cart_content(self, user):
         shopping_list = ShoppingCart.objects.filter(user=user)
-        recipe_ids = shopping_list.values_list(
-            'recipe_id', flat=True
-        )
+        recipe_ids = shopping_list.values_list('recipe_id', flat=True)
         recipes = Recipe.objects.filter(id__in=recipe_ids)
+        content = self.generate_shopping_list_text(recipes)
+        return content
 
+    def generate_shopping_list_text(self, recipes):
         content = ''
         for recipe in recipes:
             content += f'{recipe.name}\n'
-            ingredients_in_recipe = (
-                IngredientsInRecipe.objects.filter(recipe=recipe)
+            ingredients_in_recipe = IngredientsInRecipe.objects.filter(
+                recipe=recipe
             )
             for ingredient in ingredients_in_recipe:
                 content += (

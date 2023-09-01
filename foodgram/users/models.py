@@ -2,8 +2,10 @@ from django.db import models
 from django.db.models import Q, F
 from django.db.models.constraints import CheckConstraint, UniqueConstraint
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.validators import UnicodeUsernameValidator
 
 from .validators import validate_username
+from recipes.constants import USER_MAX_LEN
 
 
 class User(AbstractUser):
@@ -15,10 +17,13 @@ class User(AbstractUser):
     ]
     email = models.EmailField(unique=True)
     username = models.CharField(
-        max_length=150, unique=True, validators=[validate_username]
+        max_length=USER_MAX_LEN, unique=True, validators=[
+            validate_username,
+            UnicodeUsernameValidator()
+        ]
     )
-    first_name = models.CharField(max_length=150)
-    last_name = models.CharField(max_length=150)
+    first_name = models.CharField(max_length=USER_MAX_LEN)
+    last_name = models.CharField(max_length=USER_MAX_LEN)
 
     class Meta:
         ordering = ['last_name', 'first_name']

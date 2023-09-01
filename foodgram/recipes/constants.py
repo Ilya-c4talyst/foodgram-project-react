@@ -1,12 +1,14 @@
 """Models"""
-recipes_char_max_lenghts = rc_len = 200
+RECIPES_CHAR_MAX_LEN = 200
 """Cooking"""
-min_time = 1
-max_time = 350
+MIN_TIME = 1
+MAX_TIME = 350
 """Amount"""
-min_amount = 1
-max_amount = 1000
+MIN_AMOUNT = 1
+MAX_AMOUNT = 1000
 """Pagination"""
-page_size_recipe = 6
-max_page_size_recipe = 100
-recipes_default = 3
+PAGE_SIZE_RECIPE = 6
+MAX_PAGE_SIZE_RECIPE = 100
+RECIPES_DEFAULT = 3
+"""Users"""
+USER_MAX_LEN = 150

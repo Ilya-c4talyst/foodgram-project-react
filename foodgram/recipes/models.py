@@ -3,15 +3,18 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from colorfield.fields import ColorField
 
-from .constants import rc_len, max_time, min_time, max_amount, min_amount
+from .constants import (
+    MAX_TIME, MIN_TIME, MAX_AMOUNT,
+    MIN_AMOUNT, RECIPES_CHAR_MAX_LEN
+)
 
 
 User = get_user_model()
 
 
 class Ingredient(models.Model):
-    name = models.CharField(max_length=rc_len)
-    measurement_unit = models.CharField(max_length=rc_len)
+    name = models.CharField(max_length=RECIPES_CHAR_MAX_LEN)
+    measurement_unit = models.CharField(max_length=RECIPES_CHAR_MAX_LEN)
 
     class Meta:
         ordering = ['name', ]
@@ -26,9 +29,9 @@ class Ingredient(models.Model):
 
 
 class Tag(models.Model):
-    name = models.CharField(max_length=rc_len)
+    name = models.CharField(max_length=RECIPES_CHAR_MAX_LEN)
     color = ColorField(default='#FF0000', unique=True)
-    slug = models.SlugField(max_length=rc_len, unique=True)
+    slug = models.SlugField(max_length=RECIPES_CHAR_MAX_LEN, unique=True)
 
     class Meta:
         verbose_name = 'Тег'
@@ -39,15 +42,15 @@ class Tag(models.Model):
 
 
 class Recipe(models.Model):
-    name = models.CharField(max_length=rc_len)
+    name = models.CharField(max_length=RECIPES_CHAR_MAX_LEN)
     text = models.TextField()
     image = models.ImageField(upload_to='recipes/', blank=True)
     cooking_time = models.PositiveSmallIntegerField(
         validators=[
             MinValueValidator(
-                min_time, message='Слишком маленькое значение!'
+                MIN_TIME, message='Слишком маленькое значение!'
             ),
-            MaxValueValidator(max_time, message='Слишком большое значение!')
+            MaxValueValidator(MAX_TIME, message='Слишком большое значение!')
         ],
     )
     author = models.ForeignKey(
@@ -84,9 +87,9 @@ class IngredientsInRecipe(models.Model):
     amount = models.PositiveSmallIntegerField(
         validators=[
             MinValueValidator(
-                min_amount, message='Слишком маленькое значение!'
+                MIN_AMOUNT, message='Слишком маленькое значение!'
             ),
-            MaxValueValidator(max_amount, message='Слишком большое значение!')
+            MaxValueValidator(MAX_AMOUNT, message='Слишком большое значение!')
         ],
     )
 
@@ -147,46 +150,3 @@ class Favorites(models.Model):
 
     def __str__(self):
         return f'{self.user} <--> {self.recipe}'
-
-# Я не понимаю, как здесь указывать related name?
-# class BaseRelationModel(models.Model):
-#     user = models.ForeignKey(
-#         User,
-#         on_delete=models.CASCADE
-#     )
-#     recipe = models.ForeignKey(
-#         Recipe,
-#         on_delete=models.CASCADE
-#     )
-
-#     class Meta:
-#         abstract = True
-
-
-# class ShoppingCart(BaseRelationModel):
-#     Recipe.related_query_name = 'shopping_cart_recipes'
-
-#     class Meta:
-#         constraints = [models.UniqueConstraint(
-#             fields=['recipe', 'user'], name='unique_user_recipe'
-#         )]
-#         verbose_name = 'Покупной лист'
-#         verbose_name_plural = 'Покупной лист'
-
-
-#     def __str__(self):
-#         return f'{self.user} --> {self.recipe}'
-
-
-# class Favorites(BaseRelationModel):
-#     Recipe.related_query_name = 'favorite_recipes'
-
-#     class Meta:
-#         constraints = [models.UniqueConstraint(
-#             fields=['recipe', 'user'], name='unique_user_recipe_favor'
-#         )]
-#         verbose_name = 'Рецепт в избранном'
-#         verbose_name_plural = 'Рецепты в избранном'
-
-#     def __str__(self):
-#         return f'{self.user} <--> {self.recipe}'
