@@ -1,0 +1,44 @@
+version: '3.8'
+services:
+
+  db:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file: .env
+
+  backend:
+    image: ilyac4t/food_backend:latest
+    restart: always
+    volumes:
+      - static:/app/static/
+      - media:/app/media/
+    depends_on:
+      - db
+    env_file:
+      - .env
+
+  frontend:
+    image: ilyac4t/foodram_frontend:latest
+    volumes:
+      - ../frontend/:/app/result_build/
+
+  nginx:
+    image: nginx:1.19.3
+    ports:
+      - 8080:80
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ../frontend/build:/usr/share/nginx/html/
+      - ../docs/:/usr/share/nginx/html/api/docs/
+      - static:/var/html/static
+      - media:/var/html/media
+    restart: always
+    depends_on:
+      - backend
+      - frontend
+
+volumes:
+  postgres_data:
+  static:
+  media:
