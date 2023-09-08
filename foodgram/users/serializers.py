@@ -20,7 +20,9 @@ class UserSerializer(serializers.ModelSerializer):
             bool(
                 self.context.get('request')
                 and self.context['request'].user.is_authenticated
-                and obj.follow.filter(user=self.context['request'].user).exists()
+                and obj.follow.filter(
+                    user=self.context['request'].user
+                ).exists()
             )
         )
 
