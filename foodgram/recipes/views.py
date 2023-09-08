@@ -1,3 +1,5 @@
+from io import StringIO
+
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework import permissions, serializers
@@ -141,32 +143,31 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=[permissions.IsAuthenticated]
     )
     def download_shopping_cart(self, request):
-        content = self.generate_shopping_cart_content(request.user)
+        user = request.user
+        shopping_list = ShoppingCart.objects.filter(user=user)
+        recipe_ids = shopping_list.values_list('recipe_id', flat=True)
+        recipes = Recipe.objects.filter(id__in=recipe_ids)
+
+        content = self.generate_shopping_list_text(recipes)
+        
         response = HttpResponse(content, content_type='text/plain')
         response['Content-Disposition'] = (
             'attachment; filename="shopping_list.txt"'
         )
         return response
-
-    def generate_shopping_cart_content(self, user):
-        shopping_list = ShoppingCart.objects.filter(user=user)
-        recipe_ids = shopping_list.values_list('recipe_id', flat=True)
-        recipes = Recipe.objects.filter(id__in=recipe_ids)
-        content = self.generate_shopping_list_text(recipes)
-        return content
-
+    
     def generate_shopping_list_text(self, recipes):
-        content = ''
+        content = StringIO()
         for recipe in recipes:
-            content += f'{recipe.name}\n'
+            content.write(f'{recipe.name}\n')
             ingredients_in_recipe = IngredientsInRecipe.objects.filter(
                 recipe=recipe
             )
             for ingredient in ingredients_in_recipe:
-                content += (
+                content.write(
                     f'{ingredient.ingredient.name} '
                     f'({ingredient.ingredient.measurement_unit}) '
                     f'— {ingredient.amount}\n'
                 )
-            content += '\n'
-        return content
+            content.write('\n')
+        return content.getvalue()
