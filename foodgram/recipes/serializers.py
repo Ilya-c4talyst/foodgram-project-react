@@ -81,7 +81,7 @@ class RecipeSerializer(serializers.ModelSerializer):
                 self.context.get('request')
                 and self.context['request'].user.is_authenticated
                 and obj.shopping_cart_recipe.filter(
-                u    ser=self.context['request'].user
+                    user=self.context['request'].user
                 ).exists()
             )
         )
