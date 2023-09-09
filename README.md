@@ -14,13 +14,14 @@ https://foodgram-store.ddns.net/ - ссылка на сайт.
 Чтобы развернуть проект на сервере, вам необходимо:
 
 Создать файл .env и наполнить его следующими данными(пример)
-'''
+
+```plaintext
 POSTGRES_USER=foodgram_user
 POSTGRES_PASSWORD=foodgram_password
 POSTGRES_HOST=db
 POSTGRES_PORT=5432
-
 SECRET_KEY =''
 DEBUG='False'
 ALLOWED_HOSTS ='127.0.0.1,localhost,backend'
-'''
+```
+
