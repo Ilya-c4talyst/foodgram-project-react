@@ -66,20 +66,24 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def get_is_favorited(self, obj):
         return (
-            bool(self.context.get('request')
-            and self.context['request'].user.is_authenticated
-            and obj.favorites_recipe.filter(
-                user=self.context['request'].user
-            ).exists())
+            bool(
+                self.context.get('request')
+                and self.context['request'].user.is_authenticated
+                and obj.favorites_recipe.filter(
+                    user=self.context['request'].user
+                ).exists()
+            )
         )
 
     def get_is_in_shopping_cart(self, obj):
         return (
-            bool(self.context.get('request')
-            and self.context['request'].user.is_authenticated
-            and obj.shopping_cart_recipe.filter(
-                user=self.context['request'].user
-            ).exists())
+            bool(
+                self.context.get('request')
+                and self.context['request'].user.is_authenticated
+                and obj.shopping_cart_recipe.filter(
+                    user=self.context['request'].user
+                ).exists()
+            )
         )
 
 

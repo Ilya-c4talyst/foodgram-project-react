@@ -148,15 +148,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         shopping_list = ShoppingCart.objects.filter(user=user)
         recipe_ids = shopping_list.values_list('recipe_id', flat=True)
         recipes = Recipe.objects.filter(id__in=recipe_ids)
-
         content = self.generate_shopping_list_text(recipes)
-        
         response = HttpResponse(content, content_type='text/plain')
         response['Content-Disposition'] = (
             'attachment; filename="shopping_list.txt"'
         )
         return response
-    
+
     def generate_shopping_list_text(self, recipes):
         shopping_list = defaultdict(float)
         for recipe in recipes:
