@@ -25,3 +25,32 @@ DEBUG='False'
 ALLOWED_HOSTS ='127.0.0.1,localhost,backend'
 ```
 
+Перенести файлы из директории infra.
+
+Запустите Docker Compose с этой конфигурацией на своём компьютере.
+Выполните миграции.
+
+```plaintext
+docker compose -f docker-compose.production.yml up
+docker compose -f docker-compose.production.yml exec backend python manage.py migrate
+```
+
+## Загрузка данных из файла с ингредиентами
+
+Для загрузки в базу данных ингредиентов выполните следующую команду
+
+```plaintext
+sudo docker compose docker-compose.production.yml exec backend python manage.py ingr_csv
+```
+
+## Документация и примеры ответов
+
+При запуске на локальном сервере документацию можно получить по адресу:
+http://localhost/api/docs/redoc.html
+
+В этой документации предложены все возможные варианты запросов и примеры ответов на них.
+
+## Контакты
+Разработчик(backend) - Савченко Илья
+email - c4talyst12@yandex.ru
+
