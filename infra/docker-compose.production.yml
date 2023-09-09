@@ -8,7 +8,7 @@ services:
     env_file: .env
 
   backend:
-    image: ilyac4t/food_backend:latest
+    image: ilyac4t/foodgramm_backend:latest
     restart: always
     volumes:
       - static:/app/static/
