@@ -73,7 +73,7 @@ class FollowSerializer(UserSerializer):
                 limit = int(limit)
                 recipes_by_author = recipes_by_author[:limit]
             except ValueError:
-                limit = None
+                raise ValueError('Неверный формат')
         return RecipeOnFollowSerializer(
             recipes_by_author, many=True, context=self.context
         ).data

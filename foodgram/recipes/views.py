@@ -1,4 +1,5 @@
 from io import StringIO
+from collections import defaultdict
 
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -157,17 +158,17 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return response
     
     def generate_shopping_list_text(self, recipes):
-        content = StringIO()
+        shopping_list = defaultdict(float)
         for recipe in recipes:
-            content.write(f'{recipe.name}\n')
             ingredients_in_recipe = IngredientsInRecipe.objects.filter(
                 recipe=recipe
             )
             for ingredient in ingredients_in_recipe:
-                content.write(
-                    f'{ingredient.ingredient.name} '
-                    f'({ingredient.ingredient.measurement_unit}) '
-                    f'— {ingredient.amount}\n'
-                )
-            content.write('\n')
+                name = ingredient.ingredient.name
+                unit = ingredient.ingredient.measurement_unit
+                amount = ingredient.amount
+                shopping_list[(name, unit)] += amount
+        content = StringIO()
+        for (name, unit), amount in shopping_list.items():
+            content.write(f'{name} ({unit}) — {amount}\n')
         return content.getvalue()
